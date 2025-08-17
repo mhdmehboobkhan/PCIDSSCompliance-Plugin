@@ -1,0 +1,404 @@
+﻿@model ComplianceReportModel
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.PaymentGuard.ComplianceReport.PageTitle").Text;
+    NopHtml.SetActiveMenuItemSystemName("PaymentGuard.Menu.ComplianceReport");
+}
+
+<form asp-controller="PaymentGuard" asp-action="GenerateComplianceReport" method="post">
+    <div class="content-header clearfix">
+        <h1 class="float-left">
+            @T("Plugins.Misc.PaymentGuard.ComplianceReport.PageTitle")
+            <small><i class="fas fa-arrow-circle-left"></i> <a asp-action="Dashboard">@T("Plugins.Misc.PaymentGuard.ComplianceReport.BackToDashboard")</a></small>
+        </h1>
+        <div class="float-right">
+            <button type="submit" name="btnDownloadComplianceReport" class="btn btn-primary">
+                <i class="fas fa-download"></i> @T("Plugins.Misc.PaymentGuard.ComplianceReport.DownloadPDF")
+            </button>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="form-horizontal">
+                <div class="cards-group">
+                    <div class="card card-default card-search">
+                        <div class="card-body">
+                            <div class="row search-row opened">
+                                <div class="search-text">@T("Admin.Common.Search")</div>
+                                <div class="icon-search"><i class="fas fa-search" aria-hidden="true"></i></div>
+                                <div class="icon-collapse"><i class="far fa-angle-@(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "down" : "up")" aria-hidden="true"></i></div>
+                            </div>
+                            <div class="search-body @(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "closed" : "")">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group row">
+                                            <div class="col-md-4">
+                                                <nop-label asp-for="FromDate" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <nop-editor asp-for="FromDate" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-md-4">
+                                                <nop-label asp-for="ToDate" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <nop-editor asp-for="ToDate" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group row">
+                                            <div class="col-md-4">
+                                                <nop-label asp-for="SearchStoreId" />
+                                            </div>
+                                            <div class="col-md-8">
+                                                <nop-select asp-for="SearchStoreId" asp-items="Model.AvailableStores" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="text-center col-12">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-search"></i>
+                                            @T("Admin.Common.Search")
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-default">
+                        <div class="card-body">
+                            <!-- Report Header -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <h2>@Model.StoreName</h2>
+                                                    <p class="text-muted">
+                                                        <strong>@T("Plugins.Misc.PaymentGuard.ComplianceReport.ReportPeriod")</strong> @Model.ReportPeriod<br>
+                                                        <strong>@T("Plugins.Misc.PaymentGuard.ComplianceReport.Generated")</strong> @Model.GeneratedOnUtc.ToString("MMM dd, yyyy HH:mm") UTC
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-4 text-right">
+                                                    <div class="compliance-score">
+                                                        <span class="badge badge-@Model.ComplianceLevelClass badge-lg">
+                                                            @Model.Report.ComplianceScore.ToString("F1")% - @Model.ComplianceLevel
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Key Metrics Summary -->
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-primary"><i class="fas fa-code"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">@T("Plugins.Misc.PaymentGuard.ComplianceReport.TotalScripts")</span>
+                                            <span class="info-box-number">@Model.Report.TotalScriptsMonitored</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">@T("Plugins.Misc.PaymentGuard.ComplianceReport.Authorized")</span>
+                                            <span class="info-box-number">@Model.Report.AuthorizedScriptsCount</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-warning"><i class="fas fa-exclamation-triangle"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">@T("Plugins.Misc.PaymentGuard.ComplianceReport.Unauthorized")</span>
+                                            <span class="info-box-number">@Model.Report.UnauthorizedScriptsCount</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="info-box">
+                                        <span class="info-box-icon bg-info"><i class="fas fa-search"></i></span>
+                                        <div class="info-box-content">
+                                            <span class="info-box-text">@T("Plugins.Misc.PaymentGuard.ComplianceReport.ChecksPerformed")</span>
+                                            <span class="info-box-number">@Model.Report.TotalChecksPerformed</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Compliance Sections -->
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-clipboard-check"></i>
+                                                @T("Plugins.Misc.PaymentGuard.ComplianceReport.ComplianceAssessment")
+                                            </h3>
+                                        </div>
+                                        <div class="card-body">
+                                            @foreach (var rsection in Model.ReportSections)
+                                            {
+                                                <div class="compliance-section mb-4">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <h5>@rsection.Title</h5>
+                                                        <span class="badge badge-@rsection.StatusClass">@rsection.Status</span>
+                                                    </div>
+                                                    <p class="text-muted">@rsection.Description</p>
+
+                                                    @if (rsection.Details.Any())
+                                                    {
+                                                        <div class="details mb-2">
+                                                            <strong>Details:</strong>
+                                                            <ul class="mb-2">
+                                                                @foreach (var detail in rsection.Details)
+                                                                {
+                                                                    <li>@detail</li>
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    }
+
+                                                    @if (rsection.Actions.Any())
+                                                    {
+                                                        <div class="actions">
+                                                            <strong>Recommended Actions:</strong>
+                                                            <ul class="text-primary">
+                                                                @foreach (var action in rsection.Actions)
+                                                                {
+                                                                    <li>@action</li>
+                                                                }
+                                                            </ul>
+                                                        </div>
+                                                    }
+
+                                                    @if (rsection != Model.ReportSections.Last())
+                                                    {
+                                                        <hr>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recommendations Sidebar -->
+                                <div class="col-md-4">
+                                    @if (Model.Recommendations.HasRecommendations)
+                                    {
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h3 class="card-title">
+                                                    <i class="fas fa-lightbulb"></i>
+                                                    @T("Plugins.Misc.PaymentGuard.ComplianceReport.Recommendations")
+                                                </h3>
+                                            </div>
+                                            <div class="card-body">
+                                                @if (Model.Recommendations.HighPriorityActions.Any())
+                                                {
+                                                    <div class="recommendation-section mb-3">
+                                                        <h6 class="text-danger">
+                                                            <i class="fas fa-exclamation-circle"></i> @T("Plugins.Misc.PaymentGuard.ComplianceReport.HighPriority")
+                                                        </h6>
+                                                        <ul class="small">
+                                                            @foreach (var action in Model.Recommendations.HighPriorityActions)
+                                                            {
+                                                                <li>@action</li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+
+                                                @if (Model.Recommendations.MediumPriorityActions.Any())
+                                                {
+                                                    <div class="recommendation-section mb-3">
+                                                        <h6 class="text-warning">
+                                                            <i class="fas fa-minus-circle"></i> @T("Plugins.Misc.PaymentGuard.ComplianceReport.MediumPriority")
+                                                        </h6>
+                                                        <ul class="small">
+                                                            @foreach (var action in Model.Recommendations.MediumPriorityActions)
+                                                            {
+                                                                <li>@action</li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+
+                                                @if (Model.Recommendations.LowPriorityActions.Any())
+                                                {
+                                                    <div class="recommendation-section mb-3">
+                                                        <h6 class="text-info">
+                                                            <i class="fas fa-info-circle"></i> @T("Plugins.Misc.PaymentGuard.ComplianceReport.LowPriority")
+                                                        </h6>
+                                                        <ul class="small">
+                                                            @foreach (var action in Model.Recommendations.LowPriorityActions)
+                                                            {
+                                                                <li>@action</li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+
+                                                @if (Model.Recommendations.BestPractices.Any())
+                                                {
+                                                    <div class="recommendation-section">
+                                                        <h6 class="text-success">
+                                                            <i class="fas fa-check-circle"></i> @T("Plugins.Misc.PaymentGuard.ComplianceReport.BestPractices")
+                                                        </h6>
+                                                        <ul class="small">
+                                                            @foreach (var practice in Model.Recommendations.BestPractices)
+                                                            {
+                                                                <li>@practice</li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Most Common Unauthorized Scripts -->
+                                    @if (Model.Report.MostCommonUnauthorizedScripts.Any())
+                                    {
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h3 class="card-title">
+                                                    <i class="fas fa-list"></i>
+                                                    @T("Plugins.Misc.PaymentGuard.ComplianceReport.MostCommonIssues")
+                                                </h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <ul class="list-unstyled">
+                                                    @foreach (var script in Model.Report.MostCommonUnauthorizedScripts.Take(5))
+                                                    {
+                                                        <li class="mb-2">
+                                                            <small><code>@script</code></small>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Additional Report Details -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-info-circle"></i>
+                                                @T("Plugins.Misc.PaymentGuard.ComplianceReport.AdditionalInformation")
+                                            </h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <p><strong>@T("Plugins.Misc.PaymentGuard.ComplianceReport.LastCheckDate")</strong> @Model.Report.LastCheckDate.ToString("MMM dd, yyyy HH:mm") UTC</p>
+                                                    <p><strong>@T("Plugins.Misc.PaymentGuard.ComplianceReport.TotalAlertsGenerated")</strong> @Model.Report.AlertsGenerated</p>
+                                                    <p><strong>@T("Plugins.Misc.PaymentGuard.ComplianceReport.IssueRate")</strong> @Model.IssueRate.ToString("F1")%</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <p><strong>@T("Plugins.Misc.PaymentGuard.ComplianceReport.ReportType")</strong> @T("Plugins.Misc.PaymentGuard.ComplianceReport.PCIDSSCompliance")</p>
+                                                    <p><strong>@T("Plugins.Misc.PaymentGuard.ComplianceReport.RequirementsCovered")</strong> @T("Plugins.Misc.PaymentGuard.ComplianceReport.Requirements")</p>
+                                                    <p><strong>@T("Plugins.Misc.PaymentGuard.ComplianceReport.NextRecommendedReview")</strong> @DateTime.UtcNow.AddDays(7).ToString("MMM dd, yyyy")</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+
+<style>
+    .compliance-score .badge-lg {
+        font-size: 1.1em;
+        padding: 0.5em 1em;
+    }
+
+    .compliance-section {
+        border-left: 4px solid #dee2e6;
+        padding-left: 15px;
+    }
+
+    .compliance-section .badge-success {
+        border-left-color: #28a745;
+    }
+
+    .compliance-section .badge-danger {
+        border-left-color: #dc3545;
+    }
+
+    .compliance-section .badge-warning {
+        border-left-color: #ffc107;
+    }
+
+    .recommendation-section ul {
+        margin-bottom: 0;
+    }
+
+    .info-box {
+        box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
+        border-radius: .25rem;
+        background: #fff;
+        display: flex;
+        margin-bottom: 1rem;
+        min-height: 80px;
+        padding: .5rem;
+        position: relative;
+    }
+
+    .info-box .info-box-icon {
+        border-radius: .25rem;
+        align-items: center;
+        display: flex;
+        font-size: 1.875rem;
+        justify-content: center;
+        text-align: center;
+        width: 70px;
+    }
+
+    .info-box .info-box-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1.8;
+        margin-left: .5rem;
+        padding: 0 10px;
+    }
+
+    .info-box .info-box-number {
+        display: block;
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .info-box .info-box-text {
+        display: block;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>

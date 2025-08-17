@@ -1,0 +1,11 @@
+{
+  "Group": "Misc",
+  "FriendlyName": "PaymentGuard - PCI DSS Compliance",
+  "SystemName": "Misc.PaymentGuard",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.60" ],
+  "Author": "Retail Management Hero - Mehboob Khan",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Misc.PaymentGuard.dll",
+  "Description": "This plugin complete PCI DSS v4.0 compliance solution for requirements 6.4.3 & 11.6.1"
+}

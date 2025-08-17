@@ -1,0 +1,12 @@
+﻿@model MessageTemplateModel
+
+@using Nop.Web.Areas.Admin.Models.Messages;
+
+@if (!string.IsNullOrEmpty(Model.AllowedTokens))
+{
+    <script>
+        $(document).ready(function () {
+            $('#pnlAllowedTokens').html('<div class="form-text-row">@Model.AllowedTokens</div>')
+        });
+    </script>
+}

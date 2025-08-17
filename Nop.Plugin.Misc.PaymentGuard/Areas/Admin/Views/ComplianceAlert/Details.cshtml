@@ -1,0 +1,306 @@
+﻿@model ComplianceAlertModel
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.PaymentGuard.ComplianceAlert.Details.PageTitle").Text;
+    NopHtml.SetActiveMenuItemSystemName("PaymentGuard.Menu.Alerts");
+}
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Details.PageTitle")
+        <small>
+            <i class="fas fa-arrow-circle-left"></i>
+            <a asp-action="List">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.BackToList")</a>
+        </small>
+    </h1>
+    <div class="float-right">
+        @if (!Model.IsResolved)
+        {
+            <button type="button" class="btn btn-success" onclick="resolveAlert(@Model.Id)">
+                <i class="fas fa-check"></i>
+                @T("Plugins.Misc.PaymentGuard.ComplianceAlert.ResolveAlert")
+            </button>
+        }
+        <button type="button" class="btn btn-danger" onclick="deleteAlert(@Model.Id)">
+            <i class="fas fa-trash"></i>
+            @T("Admin.Common.Delete")
+        </button>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <!-- Alert Overview Card -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Details.AlertOverview")
+                        </h3>
+                        <div class="card-tools">
+                            <span class="badge badge-@Model.AlertLevelBadgeClass badge-lg">
+                                @Model.AlertLevel.ToUpper()
+                            </span>
+                            <span class="badge @Model.StatusBadgeClass badge-lg ml-2">
+                                @Model.StatusText
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.AlertType"):</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge badge-info">@Model.AlertType</span>
+                                    </dd>
+
+                                    <dt class="col-sm-4">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.Message"):</dt>
+                                    <dd class="col-sm-8">@Model.Message</dd>
+
+                                    <dt class="col-sm-4">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.ScriptUrl"):</dt>
+                                    <dd class="col-sm-8">
+                                        @if (!string.IsNullOrEmpty(Model.ScriptUrl))
+                                        {
+                                            <code title="@Model.ScriptUrl">
+                                                @(Model.ScriptUrl.Length > 60 ? Model.ScriptUrl.Substring(0, 60) + "..." : Model.ScriptUrl)
+                                            </code>
+                                            <button type="button" class="btn btn-sm btn-outline-secondary ml-2" onclick="copyToClipboard('@Model.ScriptUrl')">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">@T("Admin.Common.NotAvailable")</span>
+                                        }
+                                    </dd>
+
+                                    <dt class="col-sm-4">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.PageUrl"):</dt>
+                                    <dd class="col-sm-8">
+                                        @if (!string.IsNullOrEmpty(Model.PageUrl))
+                                        {
+                                            <code title="@Model.PageUrl">
+                                                @(Model.PageUrl.Length > 60 ? Model.PageUrl.Substring(0, 60) + "..." : Model.PageUrl)
+                                            </code>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">@T("Admin.Common.NotAvailable")</span>
+                                        }
+                                    </dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.AlertLevel"):</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge badge-@Model.AlertLevelBadgeClass">@Model.AlertLevel</span>
+                                    </dd>
+
+                                    <dt class="col-sm-4">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.CreatedOnUtc"):</dt>
+                                    <dd class="col-sm-8">@Model.CreatedOnUtc.ToString("MMM dd, yyyy HH:mm:ss") UTC</dd>
+
+                                    <dt class="col-sm-4">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.EmailSent"):</dt>
+                                    <dd class="col-sm-8">
+                                        @if (Model.EmailSent)
+                                        {
+                                            <span class="badge badge-success">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.EmailSent")</span>
+                                            @if (Model.EmailSentOnUtc.HasValue)
+                                            {
+                                                <br>
+
+                                                <small class="text-muted">@Model.EmailSentOnUtc.Value.ToString("MMM dd, yyyy HH:mm") UTC</small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.EmailNotSent")</span>
+                                        }
+                                    </dd>
+
+                                    @if (Model.IsResolved)
+                                    {
+                                        <dt class="col-sm-4">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.ResolvedBy"):</dt>
+                                        <dd class="col-sm-8">@Model.ResolvedBy</dd>
+
+                                        <dt class="col-sm-4">@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.ResolvedOnUtc"):</dt>
+                                        <dd class="col-sm-8">@Model.ResolvedOnUtc?.ToString("MMM dd, yyyy HH:mm:ss") UTC</dd>
+                                    }
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Details Card -->
+        @if (!string.IsNullOrEmpty(Model.Details))
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-info-circle"></i>
+                                @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Details.TechnicalDetails")
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <pre class="bg-light p-3 border rounded"><code>@Model.Details</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Actions Card -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-tasks"></i>
+                            @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Details.RecommendedActions")
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        @switch (Model.AlertType?.ToLower())
+                        {
+                            case "unauthorized-script":
+                                <div class="alert alert-warning">
+                                    <h5><i class="fas fa-exclamation-triangle"></i> @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.UnauthorizedScript.Title")</h5>
+                                    <ul class="mb-0">
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.UnauthorizedScript.Action1")</li>
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.UnauthorizedScript.Action2")</li>
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.UnauthorizedScript.Action3")</li>
+                                    </ul>
+                                    @if (!string.IsNullOrEmpty(Model.ScriptUrl))
+                                    {
+                                        <div class="mt-3">
+                                            <a href="@Url.Action("Create", "PaymentGuard", new { scriptUrl = Model.ScriptUrl })" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-plus"></i> @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.AuthorizeScript")
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                                break;
+
+                            case "csp-violation":
+                                <div class="alert alert-info">
+                                    <h5><i class="fas fa-shield-alt"></i> @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.CSPViolation.Title")</h5>
+                                    <ul class="mb-0">
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.CSPViolation.Action1")</li>
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.CSPViolation.Action2")</li>
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.CSPViolation.Action3")</li>
+                                    </ul>
+                                    <div class="mt-3">
+                                        <a href="@Url.Action("Configure", "PaymentGuard")" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-cog"></i> @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.UpdateCSPPolicy")
+                                        </a>
+                                    </div>
+                                </div>
+                                break;
+
+                            case "integrity-failure":
+                                <div class="alert alert-danger">
+                                    <h5><i class="fas fa-exclamation-circle"></i> @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.IntegrityFailure.Title")</h5>
+                                    <ul class="mb-0">
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.IntegrityFailure.Action1")</li>
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.IntegrityFailure.Action2")</li>
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.IntegrityFailure.Action3")</li>
+                                    </ul>
+                                </div>
+                                break;
+
+                            default:
+                                <div class="alert alert-secondary">
+                                    <h5><i class="fas fa-info"></i> @T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.General.Title")</h5>
+                                    <ul class="mb-0">
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.General.Action1")</li>
+                                        <li>@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Actions.General.Action2")</li>
+                                    </ul>
+                                </div>
+                                break;
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function resolveAlert(alertId) {
+        if (confirm('@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Confirm.Resolve")')) {
+            var data = { id: alertId };
+            addAntiForgeryToken(data);
+            $.post('@Url.Action("Resolve", "ComplianceAlert")', data)
+                .done(function(result) {
+                    if (result.success) {
+                        location.reload();
+                    } else {
+                        alert('@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Error.ResolveFailed")');
+                    }
+                })
+                .fail(function() {
+                    alert('@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Error.ResolveFailed")');
+                });
+        }
+    }
+
+    function deleteAlert(alertId) {
+        if (confirm('@T("Admin.Common.DeleteConfirmation")')) {
+            var data = { id: alertId };
+            addAntiForgeryToken(data);
+            $.post('@Url.Action("Delete", "ComplianceAlert")', data)
+                .done(function(result) {
+                    if (result.success) {
+                        window.location.href = '@Url.Action("List", "ComplianceAlert")';
+                    } else {
+                        alert('@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Error.DeleteFailed")');
+                    }
+                })
+                .fail(function() {
+                    alert('@T("Plugins.Misc.PaymentGuard.ComplianceAlert.Error.DeleteFailed")');
+                });
+        }
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Show temporary success message
+            var button = event.target.closest('button');
+            var originalHtml = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i>';
+            button.classList.add('btn-success');
+            setTimeout(function() {
+                button.innerHTML = originalHtml;
+                button.classList.remove('btn-success');
+            }, 2000);
+        });
+    }
+</script>
+
+<style>
+    .badge-lg {
+        font-size: 0.9em;
+        padding: 0.5em 0.75em;
+    }
+
+    pre code {
+        font-size: 0.85em;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .alert h5 {
+        margin-bottom: 0.75rem;
+    }
+
+    .alert ul {
+        margin-left: 1rem;
+    }
+</style>

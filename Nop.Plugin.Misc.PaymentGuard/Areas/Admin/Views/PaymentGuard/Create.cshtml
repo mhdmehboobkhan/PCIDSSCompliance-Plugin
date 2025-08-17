@@ -1,0 +1,35 @@
+﻿@model AuthorizedScriptModel
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.PaymentGuard.AddNewScript").Text;
+
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("PaymentGuard.Menu.ScriptManagement");
+}
+
+<form asp-controller="PaymentGuard" asp-action="Create" method="post">
+    <div class="content-header clearfix">
+        <h1 class="float-left">
+            @T("Plugins.Misc.PaymentGuard.AddNewScript")
+            <small><i class="fas fa-arrow-circle-left"></i> <a asp-action="List">@T("Plugins.Misc.PaymentGuard.BackToList")</a></small>
+        </h1>
+        <div class="float-right">
+            <button type="submit" name="save" class="btn btn-primary">
+                <i class="far fa-save"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <button type="submit" name="save-continue" class="btn btn-primary">
+                <i class="far fa-save"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>
+        </div>
+    </div>
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="form-horizontal">
+                @await Html.PartialAsync("~/Plugins/Misc.PaymentGuard/Areas/Admin/Views/PaymentGuard/_CreateOrUpdate.cshtml", Model)
+            </div>
+        </div>
+    </div>
+</form>

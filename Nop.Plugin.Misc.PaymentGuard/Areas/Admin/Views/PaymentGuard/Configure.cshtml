@@ -1,0 +1,238 @@
+﻿@using Nop.Services.Plugins
+
+@model ConfigurationModel
+@inject IPluginService pluginService
+
+@{
+    Layout = "_AdminLayout";
+    var plugin = await pluginService.GetPluginDescriptorBySystemNameAsync<IPlugin>(PaymentGuardDefaults.SystemName);
+    var friendlyName = plugin.FriendlyName;
+
+    var pageTitle = $"{T("Admin.ContentManagement.Widgets.Configure").Text} - {friendlyName}";
+    ViewBag.PageTitle = pageTitle;
+    NopHtml.SetActiveMenuItemSystemName("PaymentGuard.Menu.Configure");
+}
+
+<form asp-controller="PaymentGuard" asp-action="Configure" method="post">
+    <div class="content-header clearfix">
+        <h1 class="float-left">
+            @pageTitle
+            <small>
+                <i class="fa fa-arrow-circle-left"></i>
+                <a asp-action="List" asp-controller="Widget">@T("Admin.ContentManagement.Widgets.BackToList")</a>
+            </small>
+        </h1>
+        <div class="float-right">
+            <button type="submit" name="save" class="btn btn-primary">
+                <i class="far fa-save"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+    
+    @await Component.InvokeAsync(typeof(StoreScopeConfigurationViewComponent))
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="form-horizontal">
+                <div class="cards-group">
+                    <!-- General Settings -->
+                    <div class="card card-default">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-cog"></i>
+                                @T("Plugins.Misc.PaymentGuard.Configuration.GeneralSettings")
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="IsEnabled_OverrideForStore" asp-input="IsEnabled" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="IsEnabled" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="IsEnabled" />
+                                    <span asp-validation-for="IsEnabled"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="MonitoredPages_OverrideForStore" asp-input="MonitoredPages" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="MonitoredPages" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="MonitoredPages" />
+                                    <span asp-validation-for="MonitoredPages"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alert Settings -->
+                    <div class="card card-default">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-bell"></i>
+                                @T("Plugins.Misc.PaymentGuard.Configuration.AlertSettings")
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="EnableEmailAlerts_OverrideForStore" asp-input="EnableEmailAlerts" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="EnableEmailAlerts" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="EnableEmailAlerts" />
+                                    <span asp-validation-for="EnableEmailAlerts"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="MaxAlertFrequency_OverrideForStore" asp-input="MaxAlertFrequency" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="MaxAlertFrequency" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="MaxAlertFrequency" />
+                                    <span asp-validation-for="MaxAlertFrequency"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="card card-default">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-shield-alt"></i>
+                                @T("Plugins.Misc.PaymentGuard.Configuration.SecuritySettings")
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="EnableCSPHeaders_OverrideForStore" asp-input="EnableCSPHeaders" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="EnableCSPHeaders" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="EnableCSPHeaders" />
+                                    <span asp-validation-for="EnableCSPHeaders"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="CSPPolicy_OverrideForStore" asp-input="CSPPolicy" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="CSPPolicy" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-textarea asp-for="CSPPolicy" rows="3" />
+                                    <span asp-validation-for="CSPPolicy"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="EnableSRIValidation_OverrideForStore" asp-input="EnableSRIValidation" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="EnableSRIValidation" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="EnableSRIValidation" />
+                                    <span asp-validation-for="EnableSRIValidation"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-default">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-cogs"></i>
+                                @T("Plugins.Misc.PaymentGuard.Configuration.PaymentDetection")
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="TrustedDomains_OverrideForStore" asp-input="TrustedDomains" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="TrustedDomains" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-textarea asp-for="TrustedDomains" asp-postback="true" rows="3" />
+                                    <span asp-description-for="TrustedDomains"></span>
+                                    <nop-nested-setting asp-for="TrustedDomains_OverrideForStore" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="PaymentProviders_OverrideForStore" asp-input="PaymentProviders" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="PaymentProviders" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-textarea asp-for="PaymentProviders" asp-postback="true" rows="2" />
+                                    <span asp-description-for="PaymentProviders"></span>
+                                    <nop-nested-setting asp-for="PaymentProviders_OverrideForStore" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-calendar-alt"></i>
+                                @T("Plugins.Misc.PaymentGuard.Configuration.ScheduledReports")
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="SendWeeklyReports_OverrideForStore" asp-input="SendWeeklyReports" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="SendWeeklyReports" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="SendWeeklyReports" />
+                                    <span asp-validation-for="SendWeeklyReports" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-override-store-checkbox asp-for="WeeklyReportDay_OverrideForStore" asp-input="WeeklyReportDay" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                                    <nop-label asp-for="WeeklyReportDay" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-select asp-for="WeeklyReportDay" asp-items="Model.WeeklyReportDayOptions" />
+                                    <span asp-validation-for="WeeklyReportDay" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <nop-label asp-for="LastWeeklyReportSent" />
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="form-text-row">@Model.LastWeeklyReportSent</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+
+<script>
+    $(document).ready(function() {
+        $("#@Html.IdFor(model => model.EnableEmailAlerts)").change(function() {
+            if ($(this).is(':checked')) {
+                $("#pnl-alert-email").show();
+            } else {
+                $("#pnl-alert-email").hide();
+            }
+        }).trigger('change');
+    });
+</script>

@@ -1,0 +1,214 @@
+﻿@model AuthorizedScriptSearchModel
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.PaymentGuard.Menu.ScriptManagement").Text;
+
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("PaymentGuard.Menu.ScriptManagement");
+}
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Plugins.Misc.PaymentGuard.Menu.ScriptManagement")
+    </h1>
+    <div class="float-right">
+        <div class="btn-group">
+            <button type="button" class="btn btn-success">
+                <i class="fas fa-download"></i>
+                @T("Admin.Common.Export")
+            </button>
+            <button type="button" class="btn btn-success dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
+                <span class="sr-only">&nbsp;</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li class="dropdown-item">
+                    <button type="button" name="exporttocsv" onclick="exportScriptsToCsv()">
+                        <i class="far fa-file-csv"></i>
+                        @T("Plugins.Misc.PaymentGuard.ExportToCsv")
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="cards-group">
+                <div class="card card-default card-search">
+                    <div class="card-body">
+                        <div class="row search-row opened">
+                            <div class="search-text">@T("Admin.Common.Search")</div>
+                            <div class="icon-search"><i class="fas fa-search" aria-hidden="true"></i></div>
+                            <div class="icon-collapse"><i class="far fa-angle-@(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "down" : "up")" aria-hidden="true"></i></div>
+                        </div>
+                        <div class="search-body @(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "closed" : "")">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchScriptUrl" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-editor asp-for="SearchScriptUrl" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchIsActiveId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchIsActiveId" asp-items="Model.AvailableActiveOptions" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchStoreId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchStoreId" asp-items="Model.AvailableStores" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchRiskLevelId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchRiskLevelId" asp-items="Model.AvailableRiskLevels" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchSource" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchSource" asp-items="Model.AvailableSources" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="text-center col-12">
+                                    <button type="button" id="search-scripts" class="btn btn-primary btn-search">
+                                        <i class="fas fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-default">
+                    <div class="card-body">
+                        @await Html.PartialAsync("Table", new DataTablesModel
+                        {
+                            Name = "scripts-grid",
+                            UrlRead = new DataUrl("List", "PaymentGuard", null),
+                            SearchButtonId = "search-scripts",
+                            Length = Model.PageSize,
+                            LengthMenu = Model.AvailablePageSizes,
+                            Filters = new List<FilterParameter>
+                            {
+                                new FilterParameter(nameof(Model.SearchScriptUrl)),
+                                new FilterParameter(nameof(Model.SearchIsActiveId)),
+                                new FilterParameter(nameof(Model.SearchRiskLevelId)),
+                                new FilterParameter(nameof(Model.SearchSource)),
+                                new FilterParameter(nameof(Model.SearchStoreId)),
+                            },
+                            ColumnCollection = new List<ColumnProperty>
+                            {
+                                new ColumnProperty(nameof(AuthorizedScriptModel.ScriptUrl))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ScriptManagement.Fields.ScriptUrl").Text,
+                                    Width = "300",
+                                    Render = new RenderCustom("renderScriptUrl")
+                                },
+                                new ColumnProperty(nameof(AuthorizedScriptModel.Purpose))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ScriptManagement.Fields.Purpose").Text,
+                                    Width = "200"
+                                },
+                                new ColumnProperty(nameof(AuthorizedScriptModel.RiskLevelText))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ScriptManagement.Fields.RiskLevel").Text,
+                                    Width = "100",
+                                    Render = new RenderCustom("renderRiskLevel")
+                                },
+                                new ColumnProperty(nameof(AuthorizedScriptModel.Source))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ScriptManagement.Fields.Source").Text,
+                                    Width = "120"
+                                },
+                                new ColumnProperty(nameof(AuthorizedScriptModel.IsActive))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ScriptManagement.Fields.IsActive").Text,
+                                    Width = "100",
+                                    ClassName = NopColumnClassDefaults.CenterAll,
+                                    Render = new RenderBoolean()
+                                },
+                                new ColumnProperty(nameof(AuthorizedScriptModel.AuthorizedOnUtc))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ScriptManagement.Fields.AuthorizedOnUtc").Text,
+                                    Width = "150",
+                                    Render = new RenderDate()
+                                },
+                                new ColumnProperty(nameof(AuthorizedScriptModel.Id))
+                                {
+                                    Title = T("Admin.Common.Edit").Text,
+                                    Width = "100",
+                                    ClassName = NopColumnClassDefaults.Button,
+                                    Render = new RenderButtonEdit(new DataUrl("Edit"))
+                                }
+                            }
+                        })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function renderScriptUrl(data, type, row, meta) {
+        var url = data.length > 50 ? data.substring(0, 50) + '...' : data;
+        return '<span title="' + data + '">' + url + '</span>';
+    }
+
+    function renderRiskLevel(data, type, row, meta) {
+        var badgeClass = row.RiskLevelId == '@(RiskLevel.High)' ? 'danger' : row.RiskLevelId === '@(RiskLevel.Medium)' ? 'warning' : 'success';
+        return '<span class="badge badge-' + badgeClass + '">' + data + '</span>';
+    }
+</script>
+<script>
+    function exportScriptsToCsv() {
+        // Get current search parameters
+        var searchModel = {
+            SearchScriptUrl: $('#SearchScriptUrl').val(),
+            SearchIsActiveId: $('#SearchIsActiveId').val(),
+            SearchRiskLevel: $('#SearchRiskLevel').val(),
+            SearchSource: $('#SearchSource').val(),
+            SearchStoreId: $('#SearchStoreId').val(),
+        };
+        addAntiForgeryToken(searchModel);
+
+        // Create form and submit
+        var form = $('<form method="post" action="@Url.Action("ExportScriptsToCsv")">');
+        $.each(searchModel, function(key, value) {
+            if (value) {
+                form.append($('<input type="hidden" name="' + key + '" value="' + value + '">'));
+            }
+        });
+        $('body').append(form);
+        form.submit();
+        form.remove();
+    }
+</script>

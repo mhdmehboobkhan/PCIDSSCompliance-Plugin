@@ -1,0 +1,240 @@
+﻿@using Nop.Plugin.Misc.PaymentGuard.Helpers
+@using Nop.Core
+@model PaymentGuardScriptModel
+
+@inject IStoreContext storeContext
+@inject SRIHelper sriHelper
+
+@if (Model.IsEnabled)
+{
+    var store = await storeContext.GetCurrentStoreAsync();
+    @* CSP Header injection *@
+    if (!string.IsNullOrEmpty(Model.CSPPolicy))
+    {
+        Context.Response.Headers.Add("Content-Security-Policy", Model.CSPPolicy);
+    }
+
+    @* PaymentGuard monitoring script *@
+    <script>
+        window.PaymentGuardConfig = {
+            enabled: @Model.IsEnabled.ToString().ToLower(),
+            apiEndpoint: '@Model.ApiEndpoint',
+            pageUrl: '@Model.CurrentPageUrl',
+            storeId: @Model.StoreId,
+            enableSRI: @Model.EnableSRIValidation.ToString().ToLower(),
+            trustedDomains: @Html.Raw(Json.Serialize(Model.TrustedDomains)),
+            paymentProviders: @Html.Raw(Json.Serialize(Model.PaymentProviders)),
+            localLibraryPatterns: @Html.Raw(Json.Serialize(Model.LocalLibraryPatterns)),
+        };
+    </script>
+
+    @* Include the monitoring script with dynamic SRI *@
+    var scriptPath = $"{store.Url}Plugins/Misc.PaymentGuard/scripts/paymentguard-monitor.js";
+    var sriHash = Model.EnableSRIValidation ? await sriHelper.GenerateExternalSRIHashAsync(scriptPath) : "";
+    <script src="@scriptPath" integrity="@sriHash" crossorigin="anonymous"></script>
+
+    @* FIXED: Smart SRI validation helper *@
+    @if (Model.EnableSRIValidation)
+    {
+        <script>
+            // Enhanced PaymentGuard SRI Validation Monitor
+            (function() {
+                'use strict';
+
+                // Configuration check
+                if (!window.PaymentGuardConfig || !window.PaymentGuard) {
+                    console.warn('PaymentGuard: Configuration or core module not loaded');
+                    return;
+                }
+
+                // Track processed scripts to avoid duplicates
+                const processedScripts = new Set();
+
+                // FIXED: Define which scripts should have SRI validation
+                function shouldRequireSRI(scriptUrl) {
+                    // Skip same-origin scripts (local files) - check for localhost or current origin
+                    if (scriptUrl.startsWith('/') ||
+                        scriptUrl.includes(window.location.origin) ||
+                        scriptUrl.includes('localhost') ||
+                        scriptUrl.includes('127.0.0.1')) {
+                        return false;
+                    }
+
+                    // Skip PaymentGuard's own scripts
+                    if (scriptUrl.includes('PaymentGuard') || scriptUrl.includes('paymentguard')) {
+                        return false;
+                    }
+
+                    // Skip common local libraries that are typically bundled
+                    if (window.PaymentGuardConfig.localLibraryPatterns.some(pattern => scriptUrl.includes(pattern))) {
+                        return false;
+                    }
+
+                    // ONLY require SRI for external CDN scripts from trusted sources
+                    return window.PaymentGuardConfig.trustedDomains.some(cdn => scriptUrl.includes(cdn));
+                }
+
+                // Function to validate and report script security
+                function validateScript(scriptElement, source = 'unknown') {
+                    const src = scriptElement.src;
+
+                    // Skip if already processed or no src
+                    if (!src || processedScripts.has(src)) return;
+                    processedScripts.add(src);
+
+                    // FIXED: Only check SRI for scripts that should have it
+                    if (!shouldRequireSRI(src)) {
+                        return; // Skip SRI validation for local/trusted scripts
+                    }
+
+                    // Check for SRI hash on external CDN scripts only
+                    if (!scriptElement.integrity) {
+                        const violation = {
+                            src: src,
+                            violation: 'missing-sri-hash',
+                            source: source,
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent
+                        };
+
+                        console.warn('PaymentGuard: External CDN script loaded without SRI hash:', src, `(${source})`);
+
+                        // Report violation
+                        if (window.PaymentGuard && window.PaymentGuard.reportSecurityViolation) {
+                            window.PaymentGuard.reportSecurityViolation(violation);
+                        }
+                    }
+
+                    // Validate existing SRI hash format
+                    if (scriptElement.integrity) {
+                        const integrityValue = scriptElement.integrity.trim();
+                        const validPattern = /^(sha256|sha384|sha512)-[A-Za-z0-9+/]+=*$/;
+
+                        if (!validPattern.test(integrityValue)) {
+                            const violation = {
+                                src: src,
+                                violation: 'invalid-sri-format',
+                                integrity: integrityValue,
+                                source: source,
+                                timestamp: new Date().toISOString()
+                            };
+
+                            console.error('PaymentGuard: Invalid SRI format:', integrityValue, 'for script:', src);
+                            if (window.PaymentGuard && window.PaymentGuard.reportSecurityViolation) {
+                                window.PaymentGuard.reportSecurityViolation(violation);
+                            }
+                        }
+                    }
+                }
+
+                // 1. Monitor dynamically created scripts
+                const originalCreateElement = document.createElement;
+                document.createElement = function(tagName) {
+                    const element = originalCreateElement.call(document, tagName);
+
+                    if (tagName.toLowerCase() === 'script') {
+                        // Override src setter to catch dynamic script loading
+                        const originalSrcDescriptor = Object.getOwnPropertyDescriptor(element, 'src') ||
+                                                    Object.getOwnPropertyDescriptor(HTMLScriptElement.prototype, 'src');
+
+                        if (originalSrcDescriptor) {
+                            Object.defineProperty(element, 'src', {
+                                set: function(value) {
+                                    originalSrcDescriptor.set.call(this, value);
+                                    if (value) {
+                                        // Use setTimeout to ensure element is fully configured
+                                        setTimeout(() => validateScript(this, 'dynamic'), 0);
+                                    }
+                                },
+                                get: function() {
+                                    return originalSrcDescriptor.get.call(this);
+                                },
+                                configurable: true
+                            });
+                        }
+                    }
+
+                    return element;
+                };
+
+                // 2. Check existing/static scripts on page load
+                function checkExistingScripts() {
+                    const scripts = document.querySelectorAll('script[src]');
+                    scripts.forEach(script => {
+                        validateScript(script, 'static');
+                    });
+                }
+
+                // 3. Monitor scripts added via innerHTML or other DOM methods
+                function observeScriptAdditions() {
+                    if (!window.MutationObserver) return;
+
+                    const observer = new MutationObserver(function(mutations) {
+                        mutations.forEach(function(mutation) {
+                            mutation.addedNodes.forEach(function(node) {
+                                if (node.nodeType === Node.ELEMENT_NODE) {
+                                    // Direct script element
+                                    if (node.tagName === 'SCRIPT' && node.src) {
+                                        validateScript(node, 'dom-mutation');
+                                    }
+
+                                    // Script elements within added content
+                                    const nestedScripts = node.querySelectorAll ?
+                                                        node.querySelectorAll('script[src]') : [];
+                                    nestedScripts.forEach(script => {
+                                        validateScript(script, 'dom-mutation-nested');
+                                    });
+                                }
+                            });
+                        });
+                    });
+
+                    observer.observe(document.body || document.documentElement, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+
+                // 4. Initialize monitoring
+                function initializeMonitoring() {
+                    // Check scripts that are already loaded
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', checkExistingScripts);
+                    } else {
+                        checkExistingScripts();
+                    }
+
+                    // Start observing for new scripts
+                    if (document.body) {
+                        observeScriptAdditions();
+                    } else {
+                        document.addEventListener('DOMContentLoaded', observeScriptAdditions);
+                    }
+
+                    // Backup check after page fully loads
+                    window.addEventListener('load', function() {
+                        setTimeout(checkExistingScripts, 1000); // Delay to catch late-loading scripts
+                    });
+
+                    console.log('PaymentGuard: Smart SRI monitoring initialized - only checking external CDN scripts');
+                }
+
+                // Start monitoring
+                initializeMonitoring();
+
+                // 5. Provide manual validation function for testing
+                if (window.PaymentGuard) {
+                    window.PaymentGuard.validateAllScripts = function() {
+                        processedScripts.clear();
+                        checkExistingScripts();
+                        console.log('PaymentGuard: Manual script validation completed');
+                    };
+                }
+
+                // 6. Configuration validation
+                console.log('PaymentGuard: Smart SRI validation enabled - monitoring external CDN scripts only');
+
+            })();
+        </script>
+    }
+}

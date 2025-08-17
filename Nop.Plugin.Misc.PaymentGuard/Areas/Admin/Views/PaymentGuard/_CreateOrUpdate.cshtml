@@ -1,0 +1,111 @@
+﻿@model AuthorizedScriptModel
+
+<div asp-validation-summary="All"></div>
+<input asp-for="Id" type="hidden" />
+
+<div class="cards-group">
+    <div class="card card-default">
+        <div class="card-body">
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="ScriptUrl" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="ScriptUrl" />
+                    <span asp-validation-for="ScriptUrl"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="Purpose" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="Purpose" />
+                    <span asp-validation-for="Purpose"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="Justification" />
+                </div>
+                <div class="col-md-9">
+                    <nop-textarea asp-for="Justification" rows="3" />
+                    <span asp-validation-for="Justification"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="RiskLevelId" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="RiskLevelId" asp-items="Model.AvailableRiskLevels" />
+                    <span asp-validation-for="RiskLevelId"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="Source" />
+                </div>
+                <div class="col-md-9">
+                    <nop-select asp-for="Source" asp-items="Model.AvailableSources" />
+                    <span asp-validation-for="Source"></span>
+                </div>
+            </div>
+
+            @if (Model.AvailableStores.Count > 1)
+            {
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-label asp-for="StoreId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="StoreId" asp-items="Model.AvailableStores" />
+                        <span asp-validation-for="StoreId"></span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <input asp-for="StoreId" type="hidden" />
+            }
+
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="IsActive" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="IsActive" />
+                    <span asp-validation-for="IsActive"></span>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <nop-label asp-for="GenerateHash" />
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="GenerateHash" />
+                    <span asp-validation-for="GenerateHash"></span>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ScriptHash))
+            {
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <nop-label asp-for="ScriptHash" />
+                    </div>
+                    <div class="col-md-9">
+                        <div class="form-text-row">
+                            <code>@Model.ScriptHash</code>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,299 @@
+﻿@model ComplianceAlertSearchModel
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.PaymentGuard.Menu.Alerts").Text;
+
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("PaymentGuard.Menu.Alerts");
+}
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Plugins.Misc.PaymentGuard.Menu.Alerts")
+    </h1>
+    <div class="float-right">
+        <div class="btn-group">
+            <button type="button" class="btn btn-success">
+                <i class="fas fa-download"></i>
+                @T("Admin.Common.Export")
+            </button>
+            <button type="button" class="btn btn-success dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
+                <span class="sr-only">&nbsp;</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li class="dropdown-item">
+                    <button type="button" name="exporttocsv" onclick="exportAlertsToCsv()">
+                        <i class="far fa-file-code"></i>
+                        @T("Plugins.Misc.PaymentGuard.ExportToCsv")
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="btn-group">
+            <button type="button" class="btn btn-info">
+                <i class="fas fa-tasks"></i>
+                @T("Plugins.Misc.PaymentGuard.BulkActions")
+            </button>
+            <button type="button" class="btn btn-info dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
+                <span class="sr-only">&nbsp;</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li class="dropdown-item">
+                    <button type="button" name="bulkresolve" onclick="bulkResolveAlerts()">
+                        <i class="fa fa-check"></i>
+                        @T("Plugins.Misc.PaymentGuard.BulkResolve")
+                    </button>
+                </li>
+                <li class="dropdown-item">
+                    <button type="button" name="bulkdelete" onclick="bulkDeleteAlerts()">
+                        <i class="fa fa-trash"></i>
+                        @T("Plugins.Misc.PaymentGuard.BulkDelete")
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="cards-group">
+                <div class="card card-default card-search">
+                    <div class="card-body">
+                        <div class="row search-row opened">
+                            <div class="search-text">@T("Admin.Common.Search")</div>
+                            <div class="icon-search"><i class="fas fa-search" aria-hidden="true"></i></div>
+                            <div class="icon-collapse"><i class="far fa-angle-@(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "down" : "up")" aria-hidden="true"></i></div>
+                        </div>
+                        <div class="search-body @(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "closed" : "")">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchAlertType" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchAlertType" asp-items="Model.AvailableAlertTypes" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchAlertLevel" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchAlertLevel" asp-items="Model.AvailableAlertLevels" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchIsResolved" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchIsResolved" asp-items="Model.AvailableResolvedOptions" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4">
+                                            <nop-label asp-for="SearchStoreId" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <nop-select asp-for="SearchStoreId" asp-items="Model.AvailableStores" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="text-center col-12">
+                                    <button type="button" id="search-alerts" class="btn btn-primary btn-search">
+                                        <i class="fas fa-search"></i>
+                                        @T("Admin.Common.Search")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-default">
+                    <div class="card-body">
+                        @await Html.PartialAsync("Table", new DataTablesModel
+                        {
+                            Name = "alerts-grid",
+                            UrlRead = new DataUrl("List", "ComplianceAlert", null),
+                            SearchButtonId = "search-alerts",
+                            Length = Model.PageSize,
+                            LengthMenu = Model.AvailablePageSizes,
+                            Filters = new List<FilterParameter>
+                            {
+                                new FilterParameter(nameof(Model.SearchAlertType)),
+                                new FilterParameter(nameof(Model.SearchAlertLevel)),
+                                new FilterParameter(nameof(Model.SearchIsResolved)),
+                                new FilterParameter(nameof(Model.SearchStoreId)),
+                            },
+                            ColumnCollection = new List<ColumnProperty>
+                            {
+                                
+                                new ColumnProperty(nameof(ComplianceAlertModel.Id))
+                                {
+                                    IsMasterCheckBox = true,
+                                    Render = new RenderCheckBox("checkbox_orders"),
+                                    ClassName =  NopColumnClassDefaults.CenterAll,
+                                    Width = "50"
+                                },
+                                new ColumnProperty(nameof(ComplianceAlertModel.AlertType))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.AlertType").Text,
+                                    Width = "120"
+                                },
+                                new ColumnProperty(nameof(ComplianceAlertModel.AlertLevel))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.AlertLevel").Text,
+                                    Width = "100",
+                                    Render = new RenderCustom("renderAlertLevel")
+                                },
+                                new ColumnProperty(nameof(ComplianceAlertModel.Message))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.Message").Text,
+                                    Width = "300",
+                                    Render = new RenderCustom("renderMessage")
+                                },
+                                new ColumnProperty(nameof(ComplianceAlertModel.ScriptUrl))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.ScriptUrl").Text,
+                                    Width = "200",
+                                    Render = new RenderCustom("renderScriptUrl")
+                                },
+                                new ColumnProperty(nameof(ComplianceAlertModel.IsResolved))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.IsResolved").Text,
+                                    Width = "100",
+                                    ClassName = NopColumnClassDefaults.CenterAll,
+                                    Render = new RenderCustom("renderStatus")
+                                },
+                                new ColumnProperty(nameof(ComplianceAlertModel.CreatedOnUtc))
+                                {
+                                    Title = T("Plugins.Misc.PaymentGuard.ComplianceAlert.Fields.CreatedOnUtc").Text,
+                                    Width = "150",
+                                    Render = new RenderDate()
+                                },
+                                new ColumnProperty(nameof(ComplianceAlertModel.Id))
+                                {
+                                    Title = T("Admin.Common.View").Text,
+                                    Width = "100",
+                                    ClassName = NopColumnClassDefaults.Button,
+                                    Render = new RenderCustom("renderActions")
+                                }
+                            }
+                        })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function renderAlertLevel(data, type, row, meta) {
+        var badgeClass = data === 'critical' ? 'danger' : data === 'warning' ? 'warning' : 'info';
+        return '<span class="badge badge-' + badgeClass + '">' + data.toUpperCase() + '</span>';
+    }
+
+    function renderMessage(data, type, row, meta) {
+        var message = data.length > 50 ? data.substring(0, 50) + '...' : data;
+        return '<span title="' + data + '">' + message + '</span>';
+    }
+
+    function renderScriptUrl(data, type, row, meta) {
+        if (!data) return '-';
+        var url = data.length > 40 ? data.substring(0, 40) + '...' : data;
+        return '<small title="' + data + '"><code>' + url + '</code></small>';
+    }
+
+    function renderStatus(data, type, row, meta) {
+        var badgeClass = data ? 'success' : 'warning';
+        var text = data ? 'Resolved' : 'Open';
+        return '<span class="badge badge-' + badgeClass + '">' + text + '</span>';
+    }
+
+    function renderActions(data, type, row, meta) {
+        return '<a class="btn btn-default btn-sm" href="/Admin/ComplianceAlert/Details/' + data + '">' +
+               '<i class="fas fa-eye"></i> View</a>';
+    }
+
+    function exportAlertsToCsv() {
+        // Get current search parameters
+        var searchModel = {
+            SearchAlertType: $('#SearchAlertType').val(),
+            SearchAlertLevel: $('#SearchAlertLevel').val(),
+            SearchIsResolved: $('#SearchIsResolved').val()
+        };
+        addAntiForgeryToken(searchModel);
+
+        // Create form and submit
+        var form = $('<form method="post" action="@Url.Action("ExportAlertsToCsv", "ComplianceAlert")">');
+        $.each(searchModel, function(key, value) {
+            if (value) {
+                form.append($('<input type="hidden" name="' + key + '" value="' + value + '">'));
+            }
+        });
+        $('body').append(form);
+        form.submit();
+        form.remove();
+    }
+
+    function bulkResolveAlerts() {
+        var selectedIds = getSelectedAlertIds();
+        if (selectedIds.length === 0) {
+            alert('@T("Plugins.Misc.PaymentGuard.SelectAlerts")');
+            return;
+        }
+
+        if (confirm('@T("Plugins.Misc.PaymentGuard.BulkResolve.Confirm")')) {
+            var data = { alertIds: selectedIds };
+            addAntiForgeryToken(data);
+            $.post('@Url.Action("BulkResolveAlerts", "ComplianceAlert")', data)
+                .done(function(result) {
+                    if (result.success) {
+                        $('#alerts-grid').DataTable().ajax.reload();
+                        toastr.success(result.message);
+                    } else {
+                        toastr.error(result.message);
+                    }
+                });
+        }
+    }
+
+    function bulkDeleteAlerts() {
+        var selectedIds = getSelectedAlertIds();
+        if (selectedIds.length === 0) {
+            alert('@T("Plugins.Misc.PaymentGuard.SelectAlerts")');
+            return;
+        }
+
+        if (confirm('@T("Admin.Common.DeleteConfirmation")')) {
+            var data = { alertIds: selectedIds };
+            addAntiForgeryToken(data);
+            $.post('@Url.Action("BulkDeleteAlerts", "ComplianceAlert")', data)
+                .done(function(result) {
+                    if (result.success) {
+                        $('#alerts-grid').DataTable().ajax.reload();
+                        toastr.success(result.message);
+                    } else {
+                        toastr.error(result.message);
+                    }
+                });
+        }
+    }
+
+    function getSelectedAlertIds() {
+        var selectedIds = [];
+        $('#alerts-grid tbody input[type="checkbox"]:checked').each(function() {
+            selectedIds.push($(this).val());
+        });
+        return selectedIds;
+    }
+</script>
