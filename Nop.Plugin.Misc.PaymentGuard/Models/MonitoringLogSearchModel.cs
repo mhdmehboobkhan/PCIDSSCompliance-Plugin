@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Web.Framework.Models;
 using Nop.Web.Framework.Mvc.ModelBinding;
 
@@ -13,9 +14,11 @@ namespace Nop.Plugin.Misc.PaymentGuard.Models
         public string SearchHasUnauthorizedScripts { get; set; }
 
         [NopResourceDisplayName("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.SearchDateFrom")]
+        [UIHint("DateNullable")]
         public DateTime? SearchDateFrom { get; set; }
 
         [NopResourceDisplayName("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.SearchDateTo")]
+        [UIHint("DateNullable")]
         public DateTime? SearchDateTo { get; set; }
 
         [NopResourceDisplayName("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.SearchStoreId")]

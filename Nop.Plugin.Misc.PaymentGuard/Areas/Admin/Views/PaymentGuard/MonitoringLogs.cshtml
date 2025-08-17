@@ -12,20 +12,10 @@
         @T("Plugins.Misc.PaymentGuard.Menu.MonitoringLogs")
     </h1>
     <div class="float-right">
-        <div class="btn-group mr-2" role="group">
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown">
-                <i class="fas fa-download"></i> @T("Plugins.Misc.PaymentGuard.ExportToCsv")
-            </button>
-            <div class="dropdown-menu">
-                <a class="dropdown-item" href="javascript:void(0)" onclick="exportMonitoringLogsToCsv()">
-                    <i class="fas fa-file-csv"></i> @T("Plugins.Misc.PaymentGuard.ExportToCsv")
-                </a>
-            </div>
-        </div>
-        @* <button type="button" class="btn btn-info" onclick="showManualCheckDialog()">
-            <i class="fas fa-play"></i>
-            @T("Plugins.Misc.PaymentGuard.RunManualCheck")
-        </button> *@
+        <button type="button" class="btn btn-success" name="exporttocsv" onclick="exportMonitoringLogsToCsv()">
+            <i class="fas fa-file-csv"></i>
+            @T("Plugins.Misc.PaymentGuard.ExportToCsv")
+        </button>
     </div>
 </div>
 
@@ -38,9 +28,9 @@
                         <div class="row search-row opened">
                             <div class="search-text">@T("Admin.Common.Search")</div>
                             <div class="icon-search"><i class="fas fa-search" aria-hidden="true"></i></div>
-                            <div class="icon-collapse"><i class="far fa-angle-@(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "down" : "up")" aria-hidden="true"></i></div>
+                            <div class="icon-collapse"><i class="far fa-angle-up" aria-hidden="true"></i></div>
                         </div>
-                        <div class="search-body @(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "closed" : "")">
+                        <div class="search-body">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group row">
@@ -172,32 +162,6 @@
     </div>
 </section>
 
-<!-- Manual Check Modal -->
-@* <div class="modal fade" id="manualCheckModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">@T("Plugins.Misc.PaymentGuard.RunManualCheck")</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label for="manualCheckUrl">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.ManualCheckUrl")</label>
-                    <input type="url" class="form-control" id="manualCheckUrl" placeholder="@T("Plugins.Misc.PaymentGuard.MonitoringLogs.UrlPlaceholder")" required>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.Cancel")</button>
-                <button type="button" class="btn btn-primary" onclick="runManualCheck()">
-                    <i class="fas fa-play"></i> @T("Plugins.Misc.PaymentGuard.MonitoringLogs.RunCheck")
-                </button>
-            </div>
-        </div>
-    </div>
-</div> *@
-
 <script>
     function renderPageUrl(data, type, row, meta) {
         var url = data.length > 50 ? data.substring(0, 50) + '...' : data;
@@ -235,32 +199,6 @@
         return '<a class="btn btn-default btn-sm" href="/Admin/PaymentGuard/MonitoringLogDetails/' + data + '">' +
                '<i class="fas fa-eye"></i> @T("Plugins.Misc.PaymentGuard.MonitoringLogs.View")</a>';
     }
-
-    @*function showManualCheckDialog() {
-        $('#manualCheckModal').modal('show');
-    }
-
-    function runManualCheck() {
-        var pageUrl = $('#manualCheckUrl').val();
-        if (!pageUrl) {
-            alert('@T("Plugins.Misc.PaymentGuard.MonitoringLogs.EnterValidUrl")');
-            return;
-        }
-
-        $.post('/Admin/PaymentGuard/RunManualCheck', { pageUrl: pageUrl })
-            .done(function(result) {
-                if (result.success) {
-                    alert(result.message);
-                    $('#manualCheckModal').modal('hide');
-                    $('#monitoring-logs-grid').DataTable().ajax.reload();
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            })
-            .fail(function() {
-                alert('@T("Plugins.Misc.PaymentGuard.MonitoringLogs.ErrorPerformingCheck")');
-            });
-    }*@
 
     function exportMonitoringLogsToCsv() {
         // Get current search parameters

@@ -12,23 +12,10 @@
         @T("Plugins.Misc.PaymentGuard.Menu.ScriptManagement")
     </h1>
     <div class="float-right">
-        <div class="btn-group">
-            <button type="button" class="btn btn-success">
-                <i class="fas fa-download"></i>
-                @T("Admin.Common.Export")
-            </button>
-            <button type="button" class="btn btn-success dropdown-toggle dropdown-icon" data-toggle="dropdown" aria-expanded="false">
-                <span class="sr-only">&nbsp;</span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-                <li class="dropdown-item">
-                    <button type="button" name="exporttocsv" onclick="exportScriptsToCsv()">
-                        <i class="far fa-file-csv"></i>
-                        @T("Plugins.Misc.PaymentGuard.ExportToCsv")
-                    </button>
-                </li>
-            </ul>
-        </div>
+        <button type="button" class="btn btn-success" name="exporttocsv" onclick="exportScriptsToCsv()">
+            <i class="fas fa-file-csv"></i>
+            @T("Plugins.Misc.PaymentGuard.ExportToCsv")
+        </button>
 
         <a asp-action="Create" class="btn btn-primary">
             <i class="fas fa-plus"></i>
@@ -46,9 +33,9 @@
                         <div class="row search-row opened">
                             <div class="search-text">@T("Admin.Common.Search")</div>
                             <div class="icon-search"><i class="fas fa-search" aria-hidden="true"></i></div>
-                            <div class="icon-collapse"><i class="far fa-angle-@(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "down" : "up")" aria-hidden="true"></i></div>
+                            <div class="icon-collapse"><i class="far fa-angle-up" aria-hidden="true"></i></div>
                         </div>
-                        <div class="search-body @(!ViewData.TemplateInfo.HtmlFieldPrefix.Equals("opened") ? "closed" : "")">
+                        <div class="search-body">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group row">

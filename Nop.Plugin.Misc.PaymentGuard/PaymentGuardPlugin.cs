@@ -437,26 +437,26 @@ namespace Nop.Plugin.Misc.PaymentGuard
                     IconClass = "fas fa-shield-alt"
                 };
 
+                menuItem.ChildNodes.Add(new SiteMapNode()
+                {
+                    Title = await _localizationService.GetResourceAsync("Plugins.Misc.PaymentGuard.Menu.Configuration"),
+                    SystemName = "PaymentGuard.Menu.Configure",
+                    Url = "~/Admin/PaymentGuard/Configure",
+                    Visible = true,
+                    IconClass = "fas fa-cog"
+                });
+
                 if (await _permissionService.AuthorizeAsync(PaymentGuardPermissionProvider.ManageAuthorizedScripts))
                 {
                     menuItem.ChildNodes.Add(new SiteMapNode()
                     {
-                        Title = await _localizationService.GetResourceAsync("Plugins.Misc.PaymentGuard.Menu.Configuration"),
-                        SystemName = "PaymentGuard.Menu.Configure",
-                        Url = "~/Admin/PaymentGuard/Configure",
+                        Title = await _localizationService.GetResourceAsync("Plugins.Misc.PaymentGuard.Menu.ScriptManagement"),
+                        SystemName = "PaymentGuard.Menu.ScriptManagement",
+                        Url = "~/Admin/PaymentGuard/List",
                         Visible = true,
-                        IconClass = "fas fa-cog"
+                        IconClass = "fas fa-code"
                     });
                 }
-
-                menuItem.ChildNodes.Add(new SiteMapNode()
-                {
-                    Title = await _localizationService.GetResourceAsync("Plugins.Misc.PaymentGuard.Menu.ScriptManagement"),
-                    SystemName = "PaymentGuard.Menu.ScriptManagement",
-                    Url = "~/Admin/PaymentGuard/List",
-                    Visible = true,
-                    IconClass = "fas fa-code"
-                });
 
                 if (await _permissionService.AuthorizeAsync(PaymentGuardPermissionProvider.ViewComplianceReports))
                 {
@@ -476,6 +476,15 @@ namespace Nop.Plugin.Misc.PaymentGuard
                         Url = "~/Admin/PaymentGuard/GenerateComplianceReport",
                         Visible = true,
                         IconClass = "fas fa-clipboard-list"
+                    });
+
+                    menuItem.ChildNodes.Add(new SiteMapNode()
+                    {
+                        Title = await _localizationService.GetResourceAsync("Plugins.Misc.PaymentGuard.Menu.MonitoringLogs"),
+                        SystemName = "PaymentGuard.Menu.MonitoringLogs",
+                        Url = "~/Admin/PaymentGuard/MonitoringLogs",
+                        Visible = true,
+                        IconClass = "fas fa-list-alt"
                     });
                 }
 
@@ -780,17 +789,27 @@ namespace Nop.Plugin.Misc.PaymentGuard
                 ["Plugins.Misc.PaymentGuard.ComplianceReport.Fields.SearchStore.Hint"] = "Filter by store",
 
                 // Monitoring Log Fields
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.BackToList"] = "back to list",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.View"] = "View",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.Compliant"] = "Compliant",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.HasIssues"] = "Has Issues",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.Manual"] = "Manual",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.Scheduled"] = "Scheduled",
-                ["Plugins.Misc.PaymentGuard.MonitoringLogs.ManualCheckUrl"] = "Page URL:",
-                ["Plugins.Misc.PaymentGuard.MonitoringLogs.UrlPlaceholder"] = "https://yourstore.com/checkout",
-                ["Plugins.Misc.PaymentGuard.MonitoringLogs.Cancel"] = "Cancel",
-                ["Plugins.Misc.PaymentGuard.MonitoringLogs.RunCheck"] = "Run Check",
-                ["Plugins.Misc.PaymentGuard.MonitoringLogs.EnterValidUrl"] = "Please enter a valid URL",
-                ["Plugins.Misc.PaymentGuard.MonitoringLogs.ErrorPerformingCheck"] = "Error performing manual check",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.Details"] = "Monitoring Log Details",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.DetectedScripts"] = "Detected Scripts",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.UnauthorizedScripts"] = "Unauthorized Scripts",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.SecurityHeaders"] = "Security Headers",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.ScriptUrl"] = "Script URL",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.Authorized"] = "Authorized",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.Unauthorized"] = "Unauthorized",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.UnauthorizedScriptsWarning"] = "Warning: Unauthorized scripts were detected on this page. Please review and authorize legitimate scripts or investigate potential security threats.",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.NoDetailedData"] = "No detailed data available for this monitoring log.",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.HeaderName"] = "Name",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.HeaderValue"] = "Value",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.HeaderStatus"] = "Status",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.Summary"] = "Summary",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.Info"] = "Info",
+
 
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.PageUrl"] = "Page URL",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.PageUrl.Hint"] = "The URL of the monitored page",

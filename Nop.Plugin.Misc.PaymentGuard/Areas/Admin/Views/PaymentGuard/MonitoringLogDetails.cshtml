@@ -1,0 +1,331 @@
+﻿@model MonitoringLogModel
+@{
+    Layout = "_AdminLayout";
+    ViewBag.PageTitle = T("Plugins.Misc.PaymentGuard.MonitoringLogs.Details").Text;
+
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("PaymentGuard.Menu.MonitoringLogs");
+}
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Plugins.Misc.PaymentGuard.MonitoringLogs.Details")
+        <small><i class="fas fa-arrow-circle-left"></i> <a asp-action="MonitoringLogs">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.BackToList")</a></small>
+    </h1>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="cards-group">
+
+                <!-- Overview Card -->
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle"></i>
+                            @T("Plugins.Misc.PaymentGuard.MonitoringLogs.Info")
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <strong>@T("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.PageUrl"):</strong>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <a href="@Model.PageUrl" target="_blank" title="@Model.PageUrl">
+                                            @(Model.PageUrl.Length > 60 ? Model.PageUrl.Substring(0, 60) + "..." : Model.PageUrl)
+                                            <i class="fas fa-external-link-alt ml-1"></i>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <strong>@T("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.CheckedOnUtc"):</strong>
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Model.CheckedOnUtc.ToString("MMM dd, yyyy HH:mm:ss") UTC
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <strong>@T("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.CheckType"):</strong>
+                                    </div>
+                                    <div class="col-md-8">
+                                        @{
+                                            var checkTypeBadgeClass = Model.CheckType?.ToLower() switch
+                                            {
+                                                "manual" => "badge-info",
+                                                "scheduled" => "badge-primary",
+                                                _ => "badge-secondary"
+                                            };
+                                            var checkTypeText = Model.CheckType?.ToLower() switch
+                                            {
+                                                "manual" => T("Plugins.Misc.PaymentGuard.MonitoringLogs.Manual").Text,
+                                                "scheduled" => T("Plugins.Misc.PaymentGuard.MonitoringLogs.Scheduled").Text,
+                                                _ => Model.CheckType
+                                            };
+                                        }
+                                        <span class="badge @checkTypeBadgeClass">@checkTypeText</span>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <strong>@T("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.HasUnauthorizedScripts"):</strong>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <span class="badge badge-@Model.StatusClass">
+                                            <i class="fas @(Model.HasUnauthorizedScripts ? "fa-exclamation-triangle" : "fa-check")"></i>
+                                            @Model.StatusText
+                                        </span>
+                                    </div>
+                                </div>
+
+                                @* <div class="form-group row">
+                                    <div class="col-md-4">
+                                        <strong>@T("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.AlertSent"):</strong>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <span class="badge @(Model.AlertSent ? "badge-warning" : "badge-secondary")">
+                                            <i class="fas @(Model.AlertSent ? "fa-bell" : "fa-bell-slash")"></i>
+                                            @(Model.AlertSent ? T("Admin.Common.Yes").Text : T("Admin.Common.No").Text)
+                                        </span>
+                                    </div>
+                                </div> *@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Script Summary Card -->
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-pie"></i>
+                            @T("Plugins.Misc.PaymentGuard.MonitoringLogs.Summary")
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-primary"><i class="fas fa-code"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.TotalScriptsFound")</span>
+                                        <span class="info-box-number">@Model.TotalScriptsFound</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-success"><i class="fas fa-check"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.AuthorizedScriptsCount")</span>
+                                        <span class="info-box-number">@Model.AuthorizedScriptsCount</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-box">
+                                    <span class="info-box-icon bg-@(Model.UnauthorizedScriptsCount > 0 ? "danger" : "success")">
+                                        <i class="fas @(Model.UnauthorizedScriptsCount > 0 ? "fa-exclamation-triangle" : "fa-check")"></i>
+                                    </span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.Fields.UnauthorizedScriptsCount")</span>
+                                        <span class="info-box-number">@Model.UnauthorizedScriptsCount</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detected Scripts Card -->
+                @if (Model.DetectedScripts.Any())
+                {
+                    <div class="card card-default">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-list"></i>
+                                @T("Plugins.Misc.PaymentGuard.MonitoringLogs.DetectedScripts") (@Model.DetectedScripts.Count)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">#</th>
+                                            <th width="75%">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.ScriptUrl")</th>
+                                            <th width="20%">@T("Admin.Common.Status")</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int scriptIndex = 1;
+                                        }
+                                        @foreach (var script in Model.DetectedScripts)
+                                        {
+                                            <tr>
+                                                <td>@scriptIndex</td>
+                                                <td>
+                                                    <a href="@script" target="_blank" title="@script" class="text-break">
+                                                        @script
+                                                        <i class="fas fa-external-link-alt ml-1"></i>
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    @if (Model.UnauthorizedScripts.Contains(script))
+                                                    {
+                                                        <span class="badge badge-danger">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                            @T("Plugins.Misc.PaymentGuard.MonitoringLogs.Unauthorized")
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-check"></i>
+                                                            @T("Plugins.Misc.PaymentGuard.MonitoringLogs.Authorized")
+                                                        </span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                            scriptIndex++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Unauthorized Scripts Alert -->
+                @if (Model.UnauthorizedScripts.Any())
+                {
+                    <div class="card card-danger">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                @T("Plugins.Misc.PaymentGuard.MonitoringLogs.UnauthorizedScripts") (@Model.UnauthorizedScripts.Count)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                @T("Plugins.Misc.PaymentGuard.MonitoringLogs.UnauthorizedScriptsWarning")
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th width="5%">#</th>
+                                            <th width="95%">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.ScriptUrl")</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int unauthorizedIndex = 1;
+                                        }
+                                        @foreach (var script in Model.UnauthorizedScripts)
+                                        {
+                                            <tr>
+                                                <td>@unauthorizedIndex</td>
+                                                <td>
+                                                    <a href="@script" target="_blank" title="@script" class="text-break text-danger">
+                                                        @script
+                                                        <i class="fas fa-external-link-alt ml-1"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            unauthorizedIndex++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Security Headers Card -->
+                @if (Model.SecurityHeaders.Any())
+                {
+                    <div class="card card-default">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-shield-alt"></i>
+                                @T("Plugins.Misc.PaymentGuard.MonitoringLogs.SecurityHeaders")
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th width="30%">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.HeaderName")</th>
+                                            <th width="50%">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.HeaderValue")</th>
+                                            <th width="20%">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.HeaderStatus")</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var header in Model.SecurityHeaders)
+                                        {
+                                            <tr>
+                                                <td><strong>@header.Key</strong></td>
+                                                <td>
+                                                    @if (string.IsNullOrEmpty(header.Value))
+                                                    {
+                                                        <em class="text-muted">@T("Admin.Common.NotSet")</em>
+                                                    }
+                                                    else
+                                                    {
+                                                        <code class="text-break">@header.Value</code>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (string.IsNullOrEmpty(header.Value))
+                                                    {
+                                                        <span class="badge badge-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                            @T("Admin.Common.Missing")
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-check"></i>
+                                                            @T("Admin.Common.Present")
+                                                        </span>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- No Data Message -->
+                @if (!Model.DetectedScripts.Any() && !Model.SecurityHeaders.Any())
+                {
+                    <div class="card card-default">
+                        <div class="card-body text-center">
+                            <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">@T("Plugins.Misc.PaymentGuard.MonitoringLogs.NoDetailedData")</p>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</section>
