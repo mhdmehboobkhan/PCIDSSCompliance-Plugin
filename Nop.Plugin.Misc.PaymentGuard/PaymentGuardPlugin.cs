@@ -359,6 +359,15 @@ namespace Nop.Plugin.Misc.PaymentGuard
                     EmailAccountId = 0
                 }
             };
+
+            foreach (var temp in templates)
+            {
+                var templateObj = await _messageTemplateService.GetMessageTemplatesByNameAsync(temp.Name);
+                if (templateObj == null || templateObj.Count() == 0)
+                {
+                    await _messageTemplateService.InsertMessageTemplateAsync(temp);
+                }
+            }
         }
 
         // Also add this method to uninstall templates when plugin is uninstalled
