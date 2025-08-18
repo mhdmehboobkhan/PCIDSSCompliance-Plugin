@@ -31,7 +31,7 @@
     @* Include the monitoring script with dynamic SRI *@
     var scriptPath = $"{store.Url}Plugins/Misc.PaymentGuard/scripts/paymentguard-monitor.js";
     var sriHash = Model.EnableSRIValidation ? await sriHelper.GenerateExternalSRIHashAsync(scriptPath) : "";
-    <script src="@scriptPath" integrity="@sriHash" crossorigin="anonymous"></script>
+    <script asp-exclude-from-bundle="true" src="@scriptPath" integrity="@sriHash" crossorigin="anonymous"></script>
 
     @* FIXED: Smart SRI validation helper *@
     @if (Model.EnableSRIValidation)
