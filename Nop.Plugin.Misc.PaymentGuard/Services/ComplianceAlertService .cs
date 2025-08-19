@@ -200,14 +200,18 @@ namespace Nop.Plugin.Misc.PaymentGuard.Services
             return await query.CountAsync();
         }
 
-        public virtual async Task<IList<ComplianceAlert>> GetRecentAlertsAsync(int storeId, int hours = 24, int maxResults = 10)
+        public virtual async Task<IList<ComplianceAlert>> GetRecentAlertsAsync(int storeId, 
+            int hours = 24, int maxResults = 10, string violationType = "", string scriptUrl = "")
         {
             var cutoffDate = DateTime.UtcNow.AddHours(-hours);
 
             var query = _complianceAlertRepository.Table
                 .Where(alert => alert.StoreId == storeId && alert.CreatedOnUtc >= cutoffDate)
+                .Where(alert => (string.IsNullOrEmpty(violationType) || alert.AlertType == violationType) 
+                && (string.IsNullOrEmpty(scriptUrl) || alert.ScriptUrl == scriptUrl))
                 .OrderByDescending(alert => alert.CreatedOnUtc)
                 .Take(maxResults);
+
 
             return await query.ToListAsync();
         }

@@ -88,7 +88,7 @@ namespace Nop.Plugin.Misc.PaymentGuard.Controllers
             {
                 var store = await _storeContext.GetCurrentStoreAsync();
 
-                await _logger.InformationAsync($"Scripts reported from {request.PageUrl}: {request.Scripts.Count} scripts");
+                //await _logger.InformationAsync($"Scripts reported from {request.PageUrl}: {request.Scripts.Count} scripts");
 
                 // Process the reported scripts
                 var unauthorizedScripts = new List<string>();
@@ -171,7 +171,7 @@ namespace Nop.Plugin.Misc.PaymentGuard.Controllers
             try
             {
                 var store = await _storeContext.GetCurrentStoreAsync();
-                await _logger.WarningAsync($"Security violation reported: {request.ViolationType} - {request.ScriptUrl} on {request.PageUrl}");
+                //await _logger.WarningAsync($"Security violation reported: {request.ViolationType} - {request.ScriptUrl} on {request.PageUrl}");
 
                 // Create compliance alert based on violation type
                 ComplianceAlert alert = null;
@@ -237,11 +237,10 @@ namespace Nop.Plugin.Misc.PaymentGuard.Controllers
                     var shouldSendEmail = true;
                     if (_paymentGuardSettings.MaxAlertFrequency > 0)
                     {
-                        var recentAlerts = await _complianceAlertService.GetRecentAlertsAsync(store.Id, _paymentGuardSettings.MaxAlertFrequency);
-                        var similarRecentAlert = recentAlerts.FirstOrDefault(a =>
-                            a.AlertType == request.ViolationType &&
-                            a.ScriptUrl == request.ScriptUrl);
-
+                        var recentAlerts = await _complianceAlertService.GetRecentAlertsAsync(store.Id, 
+                            _paymentGuardSettings.MaxAlertFrequency, violationType: request.ViolationType, scriptUrl: request.ScriptUrl);
+                        
+                        var similarRecentAlert = recentAlerts.FirstOrDefault();
                         if (similarRecentAlert != null && similarRecentAlert.EmailSent)
                             shouldSendEmail = false;
                     }
@@ -390,7 +389,7 @@ namespace Nop.Plugin.Misc.PaymentGuard.Controllers
                     var result = await _monitoringService.ValidateScriptWithSRIAsync(_paymentGuardSettings,
                         store.Id, request.PageUrl, request.ScriptUrl, request.Integrity);
 
-                    await _logger.InformationAsync($"SRI validation with integrity - Script: {request.ScriptUrl}, Valid: {result.HasValidSRI}, Authorized: {result.IsAuthorized}");
+                    //await _logger.InformationAsync($"SRI validation with integrity - Script: {request.ScriptUrl}, Valid: {result.HasValidSRI}, Authorized: {result.IsAuthorized}");
 
                     return Json(new
                     {
@@ -408,7 +407,7 @@ namespace Nop.Plugin.Misc.PaymentGuard.Controllers
                     {
                         var generatedHash = await _sriValidationService.ValidateScriptIntegrityAsync(request.ScriptUrl, null);
 
-                        await _logger.InformationAsync($"Forced SRI validation - Script: {request.ScriptUrl}, Generated hash: {generatedHash.CurrentHash}, Authorized: {isAuthorized}");
+                        //await _logger.InformationAsync($"Forced SRI validation - Script: {request.ScriptUrl}, Generated hash: {generatedHash.CurrentHash}, Authorized: {isAuthorized}");
 
                         return Json(new
                         {

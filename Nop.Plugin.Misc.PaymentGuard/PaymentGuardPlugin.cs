@@ -809,6 +809,7 @@ namespace Nop.Plugin.Misc.PaymentGuard
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.UnauthorizedScripts"] = "Unauthorized Scripts",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.SecurityHeaders"] = "Security Headers",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.ScriptUrl"] = "Script URL",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.Status"] = "Status",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.Authorized"] = "Authorized",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.Unauthorized"] = "Unauthorized",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.UnauthorizedScriptsWarning"] = "Warning: Unauthorized scripts were detected on this page. Please review and authorize legitimate scripts or investigate potential security threats.",
@@ -816,6 +817,9 @@ namespace Nop.Plugin.Misc.PaymentGuard
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.HeaderName"] = "Name",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.HeaderValue"] = "Value",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.HeaderStatus"] = "Status",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.NotSet"] = "Not Set",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.Missing"] = "Missing",
+                ["Plugins.Misc.PaymentGuard.MonitoringLogs.Present"] = "Present",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.Summary"] = "Summary",
                 ["Plugins.Misc.PaymentGuard.MonitoringLogs.Info"] = "Info",
 

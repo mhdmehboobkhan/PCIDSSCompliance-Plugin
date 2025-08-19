@@ -100,7 +100,7 @@ namespace Nop.Plugin.Misc.PaymentGuard.Services
                 authorizedScript.LastVerifiedUtc = DateTime.UtcNow;
                 await _authorizedScriptService.UpdateAuthorizedScriptAsync(authorizedScript);
 
-                await _logger.InformationAsync($"SRI validation passed: {authorizedScript.ScriptUrl}");
+                //await _logger.InformationAsync($"SRI validation passed: {authorizedScript.ScriptUrl}");
             }
             else
             {
@@ -164,7 +164,7 @@ namespace Nop.Plugin.Misc.PaymentGuard.Services
                     Error = "Hash auto-updated for trusted domain"
                 };
 
-                await _logger.InformationAsync($"Auto-updated hash for trusted script: {authorizedScript.ScriptUrl}");
+                //await _logger.InformationAsync($"Auto-updated hash for trusted script: {authorizedScript.ScriptUrl}");
                 await CreateHashUpdatedAlert(authorizedScript, null, browserIntegrity, pageUrl);
             }
             else

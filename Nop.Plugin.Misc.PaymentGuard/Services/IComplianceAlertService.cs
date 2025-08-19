@@ -101,7 +101,8 @@ namespace Nop.Plugin.Misc.PaymentGuard.Services
         /// <param name="hours">Hours to look back</param>
         /// <param name="maxResults">Maximum number of results</param>
         /// <returns>Recent alerts</returns>
-        Task<IList<ComplianceAlert>> GetRecentAlertsAsync(int storeId, int hours = 24, int maxResults = 10);
+        Task<IList<ComplianceAlert>> GetRecentAlertsAsync(int storeId, 
+            int hours = 24, int maxResults = 10, string violationType = "", string scriptUrl = "");
 
         /// <summary>
         /// Check if similar alert exists recently
